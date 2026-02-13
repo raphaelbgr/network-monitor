@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "netsentinel"
+version = "0.1.0"
+description = "Comprehensive local network monitoring tool — discover, fingerprint, and track devices on your LAN"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "NetSentinel Contributors" }]
+
+dependencies = [
+    "scapy>=2.5,<3",
+    "fastapi>=0.110,<1",
+    "uvicorn[standard]>=0.27,<1",
+    "rich>=13.7",
+    "typer>=0.12,<1",
+    "aiosqlite>=0.20,<1",
+    "mac-vendor-lookup>=0.1.12,<1",
+    "pydantic>=2.6,<3",
+    "pydantic-settings>=2.1,<3",
+    "apscheduler>=3.10,<4",
+    "anyio>=4.3,<5",
+    "pyyaml>=6.0,<7",
+    "httpx>=0.27,<1",
+    "textual>=0.70,<1",
+]
+
+[project.optional-dependencies]
+nmap = ["python-nmap>=0.7,<1"]
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "ruff>=0.3"]
+
+[project.scripts]
+netsentinel = "netsentinel.cli.app:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["netsentinel"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100

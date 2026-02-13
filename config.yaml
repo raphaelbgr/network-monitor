@@ -1,0 +1,41 @@
+# NetSentinel default configuration
+# Override with ~/.netsentinel/config.yaml or environment variables (NETSENTINEL_*)
+
+# Network interface to scan (auto-detect if null)
+interface: null
+
+# Scan interval in seconds
+scan_interval: 30
+
+# Subnet to scan (auto-detect if null, e.g. "192.168.1.0/24")
+subnet: null
+
+# ARP scan timeout in seconds
+scan_timeout: 3
+
+# Maximum concurrent fingerprinting tasks
+max_concurrent_fingerprint: 20
+
+# Ports to check during quick scan
+quick_scan_ports:
+  - 22
+  - 80
+  - 443
+  - 445
+  - 548
+  - 8080
+  - 62078
+  - 5353
+
+# API server settings
+api_host: "127.0.0.1"
+api_port: 8555
+
+# Logging level (DEBUG, INFO, WARNING, ERROR)
+log_level: "INFO"
+
+# Database path (default: ~/.netsentinel/devices.db)
+db_path: null
+
+# Device is considered offline after this many seconds without being seen
+offline_threshold: 300
