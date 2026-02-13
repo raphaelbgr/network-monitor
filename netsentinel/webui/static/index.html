@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NetSentinel</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --border: #30363d;
+    --text: #e6edf3; --text-dim: #8b949e; --accent: #58a6ff;
+    --green: #3fb950; --red: #f85149; --yellow: #d29922; --orange: #db6d28;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 16px; }
+
+  /* Banner */
+  .banner { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px 20px; margin-bottom: 16px; display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .banner h1 { font-size: 20px; font-weight: 600; }
+  .banner .net-info { display: flex; gap: 20px; flex-wrap: wrap; }
+  .banner .net-info span { color: var(--text-dim); }
+  .banner .net-info strong { color: var(--text); }
+  .banner .stats { display: flex; gap: 16px; }
+  .stat { text-align: center; }
+  .stat .num { font-size: 22px; font-weight: 700; }
+  .stat .lbl { font-size: 11px; color: var(--text-dim); text-transform: uppercase; }
+
+  /* Controls */
+  .controls { display: flex; gap: 12px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+  .search-box { flex: 1; min-width: 200px; padding: 8px 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    font-size: 14px; outline: none; }
+  .search-box:focus { border-color: var(--accent); }
+  .btn { padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); cursor: pointer; font-size: 13px;
+    transition: background .15s; }
+  .btn:hover { background: var(--border); }
+  .btn-primary { background: #238636; border-color: #2ea043; }
+  .btn-primary:hover { background: #2ea043; }
+  .filter-chip { padding: 4px 10px; border-radius: 12px; font-size: 12px; border: 1px solid var(--border);
+    background: transparent; color: var(--text-dim); cursor: pointer; }
+  .filter-chip.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  th { background: #1c2128; padding: 10px 12px; text-align: left; font-weight: 600;
+    font-size: 12px; text-transform: uppercase; color: var(--text-dim);
+    cursor: pointer; user-select: none; white-space: nowrap; border-bottom: 1px solid var(--border); }
+  th:hover { color: var(--text); }
+  th .sort-arrow { margin-left: 4px; font-size: 10px; }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #1c2128; }
+  tr.offline td { opacity: 0.5; }
+  tr.new-device td { background: rgba(210, 153, 34, 0.08); }
+
+  /* Status dot */
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .dot.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .dot.offline { background: var(--red); }
+
+  /* Type icon */
+  .type-icon { font-size: 16px; }
+
+  /* Expandable detail row */
+  .detail-row td { padding: 16px 20px; background: #1c2128; }
+  .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .detail-item { }
+  .detail-item .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; }
+  .detail-item .value { font-size: 13px; margin-top: 2px; }
+
+  /* Inline edit */
+  .editable { cursor: pointer; border-bottom: 1px dashed var(--border); }
+  .editable:hover { border-color: var(--accent); }
+  .edit-input { background: var(--bg); border: 1px solid var(--accent); color: var(--text);
+    padding: 2px 6px; border-radius: 4px; font-size: 13px; width: 150px; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 20px; right: 20px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px;
+    font-size: 13px; z-index: 1000; animation: slideIn .3s ease; max-width: 350px; }
+  .toast.success { border-left: 3px solid var(--green); }
+  .toast.info { border-left: 3px solid var(--accent); }
+  @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* WS indicator */
+  .ws-status { font-size: 11px; display: flex; align-items: center; gap: 4px; }
+  .ws-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .ws-dot.connected { background: var(--green); }
+  .ws-dot.disconnected { background: var(--red); }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- Banner -->
+  <div class="banner">
+    <div>
+      <h1>NetSentinel</h1>
+      <div class="net-info" id="netInfo">
+        <span>Interface: <strong id="niIface">-</strong></span>
+        <span>Subnet: <strong id="niSubnet">-</strong></span>
+        <span>Gateway: <strong id="niGateway">-</strong></span>
+        <span>Public IP: <strong id="niPublic">-</strong></span>
+      </div>
+    </div>
+    <div class="stats" id="statsBar">
+      <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">Total</div></div>
+      <div class="stat"><div class="num" style="color:var(--green)" id="statOnline">0</div><div class="lbl">Online</div></div>
+      <div class="stat"><div class="num" style="color:var(--yellow)" id="statNew">0</div><div class="lbl">New Today</div></div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <input type="text" class="search-box" id="searchBox" placeholder="Search devices...">
+    <button class="filter-chip active" data-filter="all">All</button>
+    <button class="filter-chip" data-filter="online">Online</button>
+    <button class="filter-chip" data-filter="offline">Offline</button>
+    <button class="btn btn-primary" id="scanBtn">Scan Now</button>
+    <div class="ws-status"><div class="ws-dot disconnected" id="wsDot"></div><span id="wsLabel">Disconnected</span></div>
+  </div>
+
+  <!-- Device Table -->
+  <div class="table-wrap">
+    <table id="deviceTable">
+      <thead>
+        <tr>
+          <th data-col="status" style="width:40px"></th>
+          <th data-col="name">Name</th>
+          <th data-col="ip">IP Address</th>
+          <th data-col="mac">MAC Address</th>
+          <th data-col="vendor">Vendor</th>
+          <th data-col="type">Type</th>
+          <th data-col="latency">Latency</th>
+          <th data-col="last_seen">Last Seen</th>
+        </tr>
+      </thead>
+      <tbody id="deviceBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin;
+const WS_URL = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/events`;
+const TYPE_ICONS = {router:'🌐',phone:'📱',computer:'🖥️',tablet:'📱',smart_tv:'📺',iot_device:'📡',printer:'🖨️',game_console:'🎮',unknown:'❓'};
+
+let devices = [];
+let sortCol = 'ip';
+let sortAsc = true;
+let filterMode = 'all';
+let searchTerm = '';
+let expandedMac = null;
+let ws = null;
+
+// Fetch helpers
+async function apiGet(path) { const r = await fetch(`${API}${path}`); return r.json(); }
+async function apiPut(path, body) {
+  const r = await fetch(`${API}${path}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  return r.json();
+}
+async function apiPost(path) { const r = await fetch(`${API}${path}`, {method:'POST'}); return r.json(); }
+
+// Toast
+function showToast(msg, type='info') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// Load data
+async function loadDevices() {
+  try {
+    const data = await apiGet('/api/devices?page_size=200');
+    devices = data.devices || [];
+    render();
+  } catch(e) { console.error('Failed to load devices', e); }
+}
+
+async function loadNetInfo() {
+  try {
+    const info = await apiGet('/api/network');
+    document.getElementById('niIface').textContent = info.interface || '-';
+    document.getElementById('niSubnet').textContent = info.subnet || '-';
+    document.getElementById('niGateway').textContent = info.gateway || '-';
+    document.getElementById('niPublic').textContent = info.public_ip || '-';
+  } catch(e) {}
+}
+
+async function loadStats() {
+  try {
+    const s = await apiGet('/api/stats');
+    document.getElementById('statTotal').textContent = s.total_devices;
+    document.getElementById('statOnline').textContent = s.online_count;
+    document.getElementById('statNew').textContent = s.new_today;
+  } catch(e) {}
+}
+
+// Sort
+function ipToNum(ip) {
+  if (!ip) return 0;
+  return ip.split('.').reduce((acc, p) => (acc << 8) + parseInt(p), 0) >>> 0;
+}
+
+function getSorted(list) {
+  return [...list].sort((a,b) => {
+    let va, vb;
+    switch(sortCol) {
+      case 'status': va = a.is_online?0:1; vb = b.is_online?0:1; break;
+      case 'name': va = (a.display_name||'').toLowerCase(); vb = (b.display_name||'').toLowerCase(); break;
+      case 'ip': va = ipToNum(a.ipv4); vb = ipToNum(b.ipv4); break;
+      case 'mac': va = a.mac; vb = b.mac; break;
+      case 'vendor': va = (a.vendor||'').toLowerCase(); vb = (b.vendor||'').toLowerCase(); break;
+      case 'type': va = a.device_type; vb = b.device_type; break;
+      case 'latency': va = a.latency_ms||9999; vb = b.latency_ms||9999; break;
+      case 'last_seen': va = a.last_seen; vb = b.last_seen; break;
+      default: va = 0; vb = 0;
+    }
+    if (va < vb) return sortAsc ? -1 : 1;
+    if (va > vb) return sortAsc ? 1 : -1;
+    return 0;
+  });
+}
+
+function getFiltered(list) {
+  let result = list;
+  if (filterMode === 'online') result = result.filter(d => d.is_online);
+  else if (filterMode === 'offline') result = result.filter(d => !d.is_online);
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    result = result.filter(d =>
+      (d.display_name||'').toLowerCase().includes(q) ||
+      (d.ipv4||'').includes(q) ||
+      (d.mac||'').toLowerCase().includes(q) ||
+      (d.vendor||'').toLowerCase().includes(q)
+    );
+  }
+  return result;
+}
+
+// Render
+function render() {
+  const tbody = document.getElementById('deviceBody');
+  const sorted = getSorted(getFiltered(devices));
+  let html = '';
+  const now = Date.now();
+
+  for (const d of sorted) {
+    const online = d.is_online;
+    const firstSeen = new Date(d.first_seen).getTime();
+    const isNew = (now - firstSeen) < 3600000;
+    const rowClass = !online ? 'offline' : isNew ? 'new-device' : '';
+    const dotClass = online ? 'online' : 'offline';
+    const icon = TYPE_ICONS[d.device_type] || '❓';
+    const latency = d.latency_ms ? `${d.latency_ms.toFixed(1)}ms` : '-';
+    const lastSeen = new Date(d.last_seen).toLocaleTimeString();
+    const name = d.display_name || d.mac;
+
+    html += `<tr class="${rowClass}" data-mac="${d.mac}" onclick="toggleExpand('${d.mac}')">
+      <td><span class="dot ${dotClass}"></span></td>
+      <td><span class="editable" onclick="event.stopPropagation();startEdit('${d.mac}')" title="Click to rename">${esc(name)}</span></td>
+      <td>${d.ipv4||'-'}</td>
+      <td style="font-family:monospace;font-size:12px">${d.mac}</td>
+      <td>${esc((d.vendor||'Unknown').substring(0,22))}</td>
+      <td class="type-icon" title="${d.device_type}">${icon}</td>
+      <td style="text-align:right">${latency}</td>
+      <td>${lastSeen}</td>
+    </tr>`;
+
+    if (expandedMac === d.mac) {
+      html += `<tr class="detail-row"><td colspan="8">
+        <div class="detail-grid">
+          <div class="detail-item"><div class="label">MAC Address</div><div class="value" style="font-family:monospace">${d.mac}</div></div>
+          <div class="detail-item"><div class="label">IPv6</div><div class="value">${d.ipv6||'N/A'}</div></div>
+          <div class="detail-item"><div class="label">Hostname</div><div class="value">${esc(d.hostname||'N/A')}</div></div>
+          <div class="detail-item"><div class="label">OS Guess</div><div class="value">${esc(d.os_guess||'N/A')}</div></div>
+          <div class="detail-item"><div class="label">Open Ports</div><div class="value">${d.open_ports.length ? d.open_ports.join(', ') : 'None'}</div></div>
+          <div class="detail-item"><div class="label">mDNS Services</div><div class="value">${d.mdns_services.length ? d.mdns_services.join(', ') : 'None'}</div></div>
+          <div class="detail-item"><div class="label">Gateway</div><div class="value">${d.is_gateway?'Yes':'No'}</div></div>
+          <div class="detail-item"><div class="label">First Seen</div><div class="value">${new Date(d.first_seen).toLocaleString()}</div></div>
+          <div class="detail-item"><div class="label">Scan Count</div><div class="value">${d.scan_count}</div></div>
+          <div class="detail-item"><div class="label">Notes</div><div class="value">${esc(d.notes||'-')}</div></div>
+        </div>
+      </td></tr>`;
+    }
+  }
+  tbody.innerHTML = html;
+
+  // Update sort arrows
+  document.querySelectorAll('#deviceTable th').forEach(th => {
+    const col = th.dataset.col;
+    const arrow = th.querySelector('.sort-arrow');
+    if (arrow) arrow.remove();
+    if (col === sortCol) {
+      th.insertAdjacentHTML('beforeend', `<span class="sort-arrow">${sortAsc?'▲':'▼'}</span>`);
+    }
+  });
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function toggleExpand(mac) { expandedMac = expandedMac === mac ? null : mac; render(); }
+
+// Inline edit
+function startEdit(mac) {
+  const dev = devices.find(d => d.mac === mac);
+  if (!dev) return;
+  const name = prompt('Device name:', dev.custom_name || dev.display_name || '');
+  if (name === null) return;
+  apiPut(`/api/devices/${encodeURIComponent(mac)}/label`, { name })
+    .then(updated => {
+      const idx = devices.findIndex(d => d.mac === mac);
+      if (idx !== -1) { devices[idx] = {...devices[idx], ...updated, display_name: updated.display_name}; }
+      render();
+      showToast(`Renamed to "${name}"`, 'success');
+    })
+    .catch(e => showToast('Failed to rename', 'info'));
+}
+
+// Scan button
+document.getElementById('scanBtn').addEventListener('click', () => {
+  apiPost('/api/scan').then(() => showToast('Scan triggered')).catch(() => showToast('Scan failed'));
+});
+
+// Search
+document.getElementById('searchBox').addEventListener('input', e => { searchTerm = e.target.value; render(); });
+
+// Filter chips
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    filterMode = chip.dataset.filter;
+    render();
+  });
+});
+
+// Sort headers
+document.querySelectorAll('#deviceTable th').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (!col) return;
+    if (sortCol === col) sortAsc = !sortAsc;
+    else { sortCol = col; sortAsc = true; }
+    render();
+  });
+});
+
+// WebSocket
+function connectWS() {
+  ws = new WebSocket(WS_URL);
+  ws.onopen = () => {
+    document.getElementById('wsDot').className = 'ws-dot connected';
+    document.getElementById('wsLabel').textContent = 'Connected';
+    // Keepalive
+    setInterval(() => { if (ws.readyState === 1) ws.send('ping'); }, 30000);
+  };
+  ws.onclose = () => {
+    document.getElementById('wsDot').className = 'ws-dot disconnected';
+    document.getElementById('wsLabel').textContent = 'Disconnected';
+    setTimeout(connectWS, 3000);
+  };
+  ws.onerror = () => ws.close();
+  ws.onmessage = (evt) => {
+    if (evt.data === 'pong') return;
+    try {
+      const msg = JSON.parse(evt.data);
+      handleEvent(msg);
+    } catch(e) {}
+  };
+}
+
+function handleEvent(msg) {
+  const dev = msg.device;
+  if (dev) {
+    const idx = devices.findIndex(d => d.mac === dev.mac);
+    if (idx !== -1) devices[idx] = dev;
+    else devices.push(dev);
+  }
+
+  switch(msg.event) {
+    case 'device_new':
+      showToast(`New device: ${dev?.display_name || dev?.mac}`, 'success');
+      break;
+    case 'device_online':
+      showToast(`Online: ${dev?.display_name || dev?.mac}`, 'info');
+      break;
+    case 'device_offline':
+      showToast(`Offline: ${dev?.display_name || dev?.mac}`, 'info');
+      break;
+    case 'scan_complete':
+      loadStats();
+      break;
+  }
+  render();
+}
+
+// Init
+loadDevices();
+loadNetInfo();
+loadStats();
+connectWS();
+// Periodic refresh
+setInterval(() => { loadStats(); }, 30000);
+</script>
+</body>
+</html>
