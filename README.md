@@ -2,6 +2,21 @@
 
 A comprehensive local network monitoring tool — discover, fingerprint, and track every device on your LAN. An open-source alternative to Fing, running in your terminal and browser.
 
+## Why This Exists
+
+Most home and small-office networks are black boxes. You know your router is there, but you have no idea what else is connected, when devices joined, or whether something unfamiliar showed up overnight.
+
+Commercial tools like Fing work well but require an account, send your network data to the cloud, and lock advanced features behind a subscription. `nmap` is powerful but has a steep learning curve and no persistent tracking. Router admin panels list connected clients but forget them the moment they disconnect, offer no history, and vary wildly in quality.
+
+**Pain points this solves:**
+
+- **You don't know what's on your network** — NetSentinel scans and fingerprints every device, identifies it by vendor, hostname, and open ports, and gives each one a human label ("Dad's iPhone", "Smart Thermostat").
+- **No history** — Devices come and go silently. NetSentinel keeps a full event log: when a device first appeared, every IP change it has made, and the last time it was seen online.
+- **Cloud dependency** — All data stays in a local SQLite database on your machine. No account, no cloud sync, no subscription.
+- **CLI-hostile tools** — NetSentinel runs entirely in the terminal with a first-class TUI dashboard, but also ships a REST API and a browser UI for those who prefer point-and-click.
+- **Windows is a second-class citizen** — Most network tools assume Linux/macOS. NetSentinel works on Windows without Npcap or raw-socket privileges, using a ping-sweep + ARP-table fallback that requires no extra drivers.
+- **No programmatic access** — The full device database is exposed via a REST API with WebSocket live events, so you can build automations, dashboards, or alerts on top.
+
 ## Features
 
 - **Device discovery** — scans your local network via ARP (scapy Layer 2 when available, ping sweep + ARP table fallback on Windows)
@@ -58,13 +73,13 @@ Example output:
 +-----------------------------------------------------------------------------+
 | S  | IP Address    | Name     | MAC               | Type |    RTT |     Seen |
 |----+---------------+----------+-------------------+------+--------+----------|
-| ON | 192.168.7.1   | TP-Link~ | 30:DE:4B:E8:CE:35 | RTR  |    2ms | 16:30:50 |
-| ON | 192.168.7.5   | 80:60:B~ | 80:60:B7:C6:0E:DE | PC   |   54ms | 16:30:50 |
-| ON | 192.168.7.101 | windows~ | D8:5E:D3:57:3B:CA | PC   |    1ms | 16:30:44 |
-| ON | 192.168.7.152 | Amazon ~ | 14:0A:C5:F0:6A:7F | IoT  |    4ms | 16:30:52 |
-| ON | 192.168.7.153 | Motorol~ | EC:08:E5:74:48:39 | PHN  |   33ms | 16:30:52 |
+| ON | 192.168.1.1   | TP-Link~ | AA:BB:CC:11:22:33 | RTR  |    2ms | 16:30:50 |
+| ON | 192.168.1.10  | MacBook~ | AA:BB:CC:44:55:66 | PC   |   12ms | 16:30:50 |
+| ON | 192.168.1.20  | desktop~ | AA:BB:CC:77:88:99 | PC   |    1ms | 16:30:44 |
+| ON | 192.168.1.50  | Amazon ~ | AA:BB:CC:AA:BB:CC | IoT  |    4ms | 16:30:52 |
+| ON | 192.168.1.55  | iPhone ~ | AA:BB:CC:DD:EE:FF | PHN  |   33ms | 16:30:52 |
 +-----------------------------------------------------------------------------+
-  19 devices total.
+  12 devices total.
 ```
 
 ### Live TUI dashboard
