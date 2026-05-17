@@ -258,6 +258,8 @@ def infer_device_type(
     # Port-based hints
     if 62078 in open_ports:  # iPhone lockdownd
         return DeviceType.PHONE
+    if 8009 in open_ports:  # Chromecast / Google Cast
+        return DeviceType.SMART_TV
     if 9100 in open_ports or 631 in open_ports:
         return DeviceType.PRINTER
 
@@ -267,7 +269,7 @@ def infer_device_type(
             return DeviceType.ROUTER
     if any(v in vendor_lower for v in _PRINTER_VENDORS):
         return DeviceType.PRINTER
-    if any(v in vendor_lower for v in _TV_VENDORS) and "smart" in vendor_lower.lower():
+    if any(v in vendor_lower for v in _TV_VENDORS):
         return DeviceType.SMART_TV
     if any(v in vendor_lower for v in _IOT_VENDORS):
         return DeviceType.IOT_DEVICE
@@ -316,23 +318,17 @@ async def fingerprint_device(
     ports_task = scan_ports(ipv4, settings.quick_scan_ports)
     ipv6_task = discover_ipv6(ipv4)
 
-    vendor, hostname, os_guess, open_ports, ipv6 = await asyncio.gather(
+    results = await asyncio.gather(
         vendor_task, hostname_task, os_task, ports_task, ipv6_task,
-        return_exceptions=False,
+        return_exceptions=True,
     )
+    vendor_r, hostname_r, os_guess_r, open_ports_r, ipv6_r = results
 
-    # Handle exceptions from gather (shouldn't happen with return_exceptions=False,
-    # but be defensive)
-    if isinstance(vendor, BaseException):
-        vendor = None
-    if isinstance(hostname, BaseException):
-        hostname = None
-    if isinstance(os_guess, BaseException):
-        os_guess = None
-    if isinstance(open_ports, BaseException):
-        open_ports = []
-    if isinstance(ipv6, BaseException):
-        ipv6 = None
+    vendor: str | None = vendor_r if not isinstance(vendor_r, BaseException) else None
+    hostname: str | None = hostname_r if not isinstance(hostname_r, BaseException) else None
+    os_guess: str | None = os_guess_r if not isinstance(os_guess_r, BaseException) else None
+    open_ports: list[int] = open_ports_r if not isinstance(open_ports_r, BaseException) else []
+    ipv6: str | None = ipv6_r if not isinstance(ipv6_r, BaseException) else None
 
     # Try nmap OS detection as enrichment
     if os_guess is None:

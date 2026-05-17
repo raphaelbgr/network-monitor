@@ -11,7 +11,7 @@ from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-_DEFAULT_PORTS = [22, 80, 443, 445, 548, 8080, 62078, 5353]
+_DEFAULT_PORTS = [22, 80, 443, 445, 548, 8009, 8080, 62078, 5353]
 
 
 def _load_yaml_config() -> dict[str, Any]:
