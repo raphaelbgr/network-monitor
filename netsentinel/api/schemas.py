@@ -28,7 +28,7 @@ class DeviceResponse(BaseModel):
     first_seen: datetime
     last_seen: datetime
     last_changed: datetime
-    scan_count: int = 0
+    scan_count: int = 1
     notes: str | None = None
 
 

@@ -316,10 +316,12 @@ def _parse_arp_table(gateway_ip: str | None) -> list[dict[str, Any]]:
     seen_macs: set[str] = set()
 
     for line in result.stdout.splitlines():
-        # Skip broadcast and incomplete entries
+        # Skip broadcast and incomplete entries.
+        # Note: do NOT skip "static" entries — on Windows the gateway is commonly
+        # listed as a static ARP entry, and skipping it causes the router to be absent.
         if "ff-ff-ff-ff-ff-ff" in line.lower() or "ff:ff:ff:ff:ff:ff" in line.lower():
             continue
-        if "incomplete" in line.lower() or "static" in line.lower():
+        if "incomplete" in line.lower():
             continue
 
         ip_match = ip_pattern.search(line)
