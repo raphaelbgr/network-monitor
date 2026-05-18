@@ -1,0 +1,340 @@
+# Instincts generated from https://github.com/raphaelbgr/network-monitor
+# Generated: 2026-05-18T20:15:48.658Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: network-monitor-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/raphaelbgr/network-monitor
+---
+
+# Network Monitor Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: fix, test, docs
+
+## Evidence
+
+- 3 commits analyzed
+- Detected conventional commit pattern
+- Examples: fix: correct four fingerprinting and scan bugs, test: add 52-test suite covering models, fingerprint, scanner, and DB
+
+---
+id: network-monitor-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/raphaelbgr/network-monitor
+---
+
+# Network Monitor Commit Length
+
+## Action
+
+Write moderate-length commit messages (~57 characters)
+
+## Evidence
+
+- Average commit message length: 57 chars
+- Based on 3 commits
+
+---
+id: network-monitor-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/raphaelbgr/network-monitor
+---
+
+# Network Monitor Naming Files
+
+## Action
+
+Use snake_case naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: snake_case
+
+---
+id: network-monitor-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/raphaelbgr/network-monitor
+---
+
+# Network Monitor Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: network-monitor-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/raphaelbgr/network-monitor
+---
+
+# Network Monitor Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: network-monitor-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/raphaelbgr/network-monitor
+---
+
+# Network Monitor Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: network-monitor-test-naming
+trigger: "when creating a test file"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/raphaelbgr/network-monitor
+---
+
+# Network Monitor Test Naming
+
+## Action
+
+Name test files using the pattern: *.test.ts
+
+## Evidence
+
+- File pattern: *.test.ts
+- Consistent across test files
+
+---
+id: network-monitor-instinct-file-naming
+trigger: "When creating a new Python file"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: raphaelbgr/network-monitor
+---
+
+# Network Monitor Instinct File Naming
+
+## Action
+
+Name the file using snake_case
+
+## Evidence
+
+- Pattern in namingConventions.files: snake_case
+
+---
+id: network-monitor-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: raphaelbgr/network-monitor
+---
+
+# Network Monitor Instinct Function Naming
+
+## Action
+
+Name the function using camelCase
+
+## Evidence
+
+- Pattern in namingConventions.functions: camelCase
+
+---
+id: network-monitor-instinct-class-naming
+trigger: "When defining a new class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: raphaelbgr/network-monitor
+---
+
+# Network Monitor Instinct Class Naming
+
+## Action
+
+Name the class using PascalCase
+
+## Evidence
+
+- Pattern in namingConventions.classes: PascalCase
+
+---
+id: network-monitor-instinct-constant-naming
+trigger: "When defining a constant"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: raphaelbgr/network-monitor
+---
+
+# Network Monitor Instinct Constant Naming
+
+## Action
+
+Name the constant using SCREAMING_SNAKE_CASE
+
+## Evidence
+
+- Pattern in namingConventions.constants: SCREAMING_SNAKE_CASE
+
+---
+id: network-monitor-instinct-import-style
+trigger: "When importing modules in Python code"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: raphaelbgr/network-monitor
+---
+
+# Network Monitor Instinct Import Style
+
+## Action
+
+Use relative imports
+
+## Evidence
+
+- Pattern in importStyle: relative
+
+---
+id: network-monitor-instinct-export-style
+trigger: "When exporting symbols from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: raphaelbgr/network-monitor
+---
+
+# Network Monitor Instinct Export Style
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in exportStyle: named
+
+---
+id: network-monitor-instinct-test-file-location
+trigger: "When adding new tests"
+confidence: 0.9
+domain: testing
+source: repo-analysis
+source_repo: raphaelbgr/network-monitor
+---
+
+# Network Monitor Instinct Test File Location
+
+## Action
+
+Place test files in the separate 'tests' folder
+
+## Evidence
+
+- Pattern in folderStructure.commonFolders: tests
+- testLocation: separate
+
+---
+id: network-monitor-instinct-test-file-pattern
+trigger: "When naming a test file"
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: raphaelbgr/network-monitor
+---
+
+# Network Monitor Instinct Test File Pattern
+
+## Action
+
+Use the '*.test.ts' naming pattern
+
+## Evidence
+
+- Pattern in testing.filePattern: *.test.ts
+
+---
+id: network-monitor-instinct-test-type
+trigger: "When writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: raphaelbgr/network-monitor
+---
+
+# Network Monitor Instinct Test Type
+
+## Action
+
+Write unit tests
+
+## Evidence
+
+- Pattern in testing.testTypes: unit
+
+---
+id: network-monitor-instinct-commit-format
+trigger: "When making a git commit"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: raphaelbgr/network-monitor
+---
+
+# Network Monitor Instinct Commit Format
+
+## Action
+
+Format the commit message as '<type>: <description>' using 'fix', 'test', or 'docs' as type
+
+## Evidence
+
+- Seen in commit: fix: correct four fingerprinting and scan bugs
+- Seen in commit: test: add 52-test suite covering models, fingerprint, scanner, and DB
+- Seen in commit: docs: add PENDING, ARCHITECTURE, CHANGELOG, and BMAD docs
+
